@@ -1,16 +1,12 @@
 import os
-from pymongo import MongoClient
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
-import dns.resolver
-
-resolver = dns.resolver.Resolver(configure=False)
-resolver.nameservers = ["8.8.8.8", "1.1.1.1"]
-dns.resolver.default_resolver = resolver
 
 load_dotenv()
 
-MONGODB_URI = os.getenv("MONGODB_URI")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-client = MongoClient(MONGODB_URI)
-db = client["livraria"]
-colecao_livros = db["livros"]
+
+def get_connection():
+    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
