@@ -1,19 +1,38 @@
+from config import get_connection
 
-from config import colecao_livros
+
+def _consultar(sql, params=None, um=False):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            return cur.fetchone() if um else cur.fetchall()
+    finally:
+        conn.close()
 
 
 def buscar_livros(genero=None):
-    filtro = {}
+    base = ("SELECT id, titulo, autor, genero, preco::float AS preco, estoque "
+            "FROM livros")
     if genero:
-        filtro["genero"] = {"$regex": f"^{genero}$", "$options": "i"}
-
-    livros = list(colecao_livros.find(filtro, {"_id": 0}))
-    return livros
+        sql = base + " WHERE LOWER(genero) = LOWER(%s) ORDER BY id"
+        return [dict(r) for r in _consultar(sql, (genero,))]
+    return [dict(r) for r in _consultar(base + " ORDER BY id")]
 
 
 def buscar_por_id(livro_id):
-    return colecao_livros.find_one({"id": livro_id}, {"_id": 0})
+    sql = ("SELECT id, titulo, autor, genero, preco::float AS preco, estoque "
+           "FROM livros WHERE id = %s")
+    r = _consultar(sql, (livro_id,), um=True)
+    return dict(r) if r else None
 
 
 def listar_generos():
-    return sorted(colecao_livros.distinct("genero"))
+    rows = _consultar("SELECT DISTINCT genero FROM livros ORDER BY genero")
+    return [r["genero"] for r in rows]
+
+
+def listar_usuarios():
+    sql = ("SELECT id, nome, email, telefone, criado_em::text AS criado_em "
+           "FROM usuarios ORDER BY id")
+    return [dict(r) for r in _consultar(sql)]
