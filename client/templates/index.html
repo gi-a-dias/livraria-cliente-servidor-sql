@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livraria Tech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #16213E;
+            --ink-soft: #3B4668;
+            --paper: #F3F5F9;
+            --card: #FFFFFF;
+            --line: #DDE2EC;
+            --amber: #E8A33D;
+            --amber-dark: #8A5A0B;
+            --danger: #C2412D;
+            --ok: #1F7A5A;
+            --serif: 'Fraunces', Georgia, serif;
+            --sans: 'DM Sans', system-ui, sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ink: #E8ECF7;
+                --ink-soft: #A6B0CC;
+                --paper: #0F1426;
+                --card: #182039;
+                --line: #2A3558;
+                --amber-dark: #F2BD6A;
+                --danger: #FF8C78;
+                --ok: #5CD3A6;
+            }
+            .topo { background: #182039; }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+        button, input { font: inherit; color: inherit; }
+        :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+        .topo { background: #16213E; color: #F3F5F9; padding: 40px 20px 72px; }
+        .topo-inner { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+        .topo h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; line-height: 1.05; }
+        .topo p { color: #B5BFDA; margin-top: 8px; max-width: 42ch; }
+        .contadores { display: flex; gap: 28px; }
+        .contadores div { text-align: right; }
+        .contadores strong { display: block; font-family: var(--serif); font-size: 2rem; color: var(--amber); line-height: 1; }
+        .contadores span { font-size: 0.85rem; color: #B5BFDA; }
+
+        main { max-width: 1000px; margin: -40px auto 60px; padding: 0 20px; }
+
+        .barra { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 14px; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(22, 33, 62, 0.08); }
+        .barra input[type=search] { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); }
+        .barra input[type=search]::placeholder { color: var(--ink-soft); }
+        .filtros { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .chip { border: 1px solid var(--line); background: transparent; padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 0.9rem; transition: background .15s, color .15s; }
+        .chip:hover { background: var(--paper); }
+        .chip[aria-pressed=true] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+        .filtros .sep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
+
+        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+
+        .livro { display: flex; flex-direction: column; gap: 12px; }
+        .capa { position: relative; aspect-ratio: 3 / 4; border-radius: 4px 10px 10px 4px; padding: 22px 20px 20px 28px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-shadow: 0 10px 20px -8px rgba(22, 33, 62, 0.45); }
+        .capa::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 12px; background: rgba(0, 0, 0, 0.22); border-right: 1px solid rgba(255, 255, 255, 0.15); }
+        .capa-titulo { font-family: var(--serif); font-weight: 700; font-size: 1.5rem; line-height: 1.1; text-wrap: balance; }
+        .capa-autor { font-size: 0.85rem; opacity: 0.85; }
+        .fav { position: absolute; top: 10px; right: 10px; width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; background: rgba(255, 255, 255, 0.18); color: #fff; font-size: 1.2rem; display: grid; place-items: center; transition: transform .15s, background .15s; }
+        .fav:hover { background: rgba(255, 255, 255, 0.32); transform: scale(1.1); }
+        .fav[aria-pressed=true] { background: #fff; color: var(--danger); }
+
+        .info { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 0 2px; }
+        .preco { font-family: var(--serif); font-size: 1.3rem; font-weight: 700; }
+        .genero { font-size: 0.85rem; color: var(--ink-soft); }
+        .estoque { font-size: 0.85rem; font-weight: 500; }
+        .estoque.baixo { color: var(--amber-dark); }
+        .estoque.ok { color: var(--ok); }
+        .estoque.zero { color: var(--danger); }
+
+        .aviso { grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--card); border: 1px dashed var(--line); border-radius: 14px; }
+        .aviso strong { display: block; font-family: var(--serif); font-size: 1.3rem; margin-bottom: 6px; }
+        .aviso p { color: var(--ink-soft); }
+        .aviso button { margin-top: 16px; padding: 10px 18px; border-radius: 10px; border: none; background: var(--ink); color: var(--paper); cursor: pointer; font-weight: 500; }
+
+        .esqueleto { aspect-ratio: 3 / 4; border-radius: 4px 10px 10px 4px; background: linear-gradient(100deg, var(--line) 30%, var(--card) 50%, var(--line) 70%); background-size: 300% 100%; animation: brilho 1.4s linear infinite; }
+        @keyframes brilho { to { background-position: -100% 0; } }
+        @media (prefers-reduced-motion: reduce) { .esqueleto { animation: none; } * { transition: none !important; } }
+
+        @media (max-width: 560px) { .contadores div { text-align: left; } .topo { padding-bottom: 64px; } }
+    </style>
+</head>
+<body>
+    <header class="topo">
+        <div class="topo-inner">
+            <div>
+                <h1>Livraria Tech</h1>
+                <p>Catálogo ao vivo, direto do servidor da livraria.</p>
+            </div>
+            <div class="contadores" aria-live="polite">
+                <div><strong id="cont-total">–</strong><span>títulos</span></div>
+                <div><strong id="cont-fav">0</strong><span>favoritos</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="barra" aria-label="Filtros">
+            <input type="search" id="busca" placeholder="Buscar por título ou autor" aria-label="Buscar por título ou autor">
+            <div class="filtros" id="filtros"></div>
+        </section>
+
+        <section class="grade" id="grade" aria-live="polite"></section>
+    </main>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        const estado = { livros: [], generos: [], genero: '', soFavoritos: false, busca: '', favoritos: new Set() };
+
+        // ---- favoritos (guardados no navegador) ----
+        try {
+            estado.favoritos = new Set(JSON.parse(localStorage.getItem('favoritos') || '[]'));
+        } catch (e) { /* sem localStorage: segue sem persistir */ }
+
+        function salvarFavoritos() {
+            try { localStorage.setItem('favoritos', JSON.stringify([...estado.favoritos])); } catch (e) {}
+        }
+
+        // ---- API (fala com o cliente Flask, que fala com o servidor) ----
+        async function api(caminho) {
+            const resp = await fetch(caminho);
+            const corpo = await resp.json();
+            if (!resp.ok || corpo.status !== 'sucesso') throw new Error(corpo.mensagem || 'Erro inesperado');
+            return corpo.dados;
+        }
+
+        async function carregarLivros() {
+            mostrarCarregando();
+            try {
+                const qs = estado.genero ? '?genero=' + encodeURIComponent(estado.genero) : '';
+                estado.livros = await api('/api/livros' + qs);
+                if (!estado.genero) $('cont-total').textContent = estado.livros.length;
+                desenhar();
+            } catch (err) {
+                mostrarErro(err.message);
+            }
+        }
+
+        async function carregarGeneros() {
+            try { estado.generos = await api('/api/generos'); } catch (e) { estado.generos = []; }
+            desenharFiltros();
+        }
+
+        // ---- visual ----
+        function corDaCapa(genero) {
+            let h = 0;
+            for (const c of genero) h = (h * 31 + c.charCodeAt(0)) % 360;
+            return `hsl(${h}, 42%, 28%)`;
+        }
+
+        function el(tag, classe, texto) {
+            const e = document.createElement(tag);
+            if (classe) e.className = classe;
+            if (texto !== undefined) e.textContent = texto;
+            return e;
+        }
+
+        function desenharFiltros() {
+            const box = $('filtros');
+            box.replaceChildren();
+            const criar = (rotulo, ativo, aoClicar) => {
+                const b = el('button', 'chip', rotulo);
+                b.type = 'button';
+                b.setAttribute('aria-pressed', ativo);
+                b.addEventListener('click', aoClicar);
+                return b;
+            };
+            box.append(criar('Todos', !estado.genero, () => { estado.genero = ''; desenharFiltros(); carregarLivros(); }));
+            estado.generos.forEach((g) =>
+                box.append(criar(g, estado.genero === g, () => { estado.genero = g; desenharFiltros(); carregarLivros(); })));
+            box.append(el('span', 'sep'));
+            box.append(criar('♥ Só favoritos', estado.soFavoritos, () => { estado.soFavoritos = !estado.soFavoritos; desenharFiltros(); desenhar(); }));
+        }
+
+        function mostrarCarregando() {
+            const grade = $('grade');
+            grade.replaceChildren(...Array.from({ length: 3 }, () => el('div', 'esqueleto')));
+        }
+
+        function mostrarAviso(titulo, texto, botao) {
+            const caixa = el('div', 'aviso');
+            caixa.append(el('strong', '', titulo), el('p', '', texto));
+            if (botao) {
+                const b = el('button', '', botao.rotulo);
+                b.type = 'button';
+                b.addEventListener('click', botao.acao);
+                caixa.append(b);
+            }
+            $('grade').replaceChildren(caixa);
+        }
+
+        function mostrarErro(msg) {
+            mostrarAviso('Não foi possível carregar o catálogo', msg, { rotulo: 'Tentar de novo', acao: carregarLivros });
+        }
+
+        function criarCard(livro) {
+            const card = el('article', 'livro');
+
+            const capa = el('div', 'capa');
+            capa.style.background = corDaCapa(livro.genero);
+            capa.append(el('div', 'capa-titulo', livro.titulo));
+            if (livro.autor) capa.append(el('div', 'capa-autor', livro.autor));
+
+            const fav = el('button', 'fav', '♥');
+            fav.type = 'button';
+            const marcado = estado.favoritos.has(livro.id);
+            fav.setAttribute('aria-pressed', marcado);
+            fav.setAttribute('aria-label', (marcado ? 'Remover dos favoritos: ' : 'Adicionar aos favoritos: ') + livro.titulo);
+            fav.addEventListener('click', () => {
+                estado.favoritos.has(livro.id) ? estado.favoritos.delete(livro.id) : estado.favoritos.add(livro.id);
+                salvarFavoritos();
+                desenhar();
+            });
+            capa.append(fav);
+
+            const info = el('div', 'info');
+            const esq = el('div');
+            esq.append(el('div', 'preco', brl.format(livro.preco)), el('div', 'genero', livro.genero));
+
+            let classe = 'ok', texto = `${livro.estoque} em estoque`;
+            if (livro.estoque === 0) { classe = 'zero'; texto = 'Esgotado'; }
+            else if (livro.estoque <= 2) { classe = 'baixo'; texto = livro.estoque === 1 ? 'Última unidade' : `Só ${livro.estoque} restantes`; }
+            info.append(esq, el('div', 'estoque ' + classe, texto));
+
+            card.append(capa, info);
+            return card;
+        }
+
+        function desenhar() {
+            $('cont-fav').textContent = estado.favoritos.size;
+            const termo = estado.busca.trim().toLowerCase();
+
+            const lista = estado.livros.filter((l) =>
+                (!estado.soFavoritos || estado.favoritos.has(l.id)) &&
+                (!termo || l.titulo.toLowerCase().includes(termo) || (l.autor || '').toLowerCase().includes(termo)));
+
+            if (!lista.length) {
+                const limpar = () => { estado.busca = ''; $('busca').value = ''; estado.soFavoritos = false; estado.genero = ''; desenharFiltros(); carregarLivros(); };
+                return mostrarAviso('Nenhum livro encontrado', 'Tente outro termo ou remova os filtros.', { rotulo: 'Limpar filtros', acao: limpar });
+            }
+            $('grade').replaceChildren(...lista.map(criarCard));
+        }
+
+        $('busca').addEventListener('input', (e) => { estado.busca = e.target.value; desenhar(); });
+
+        desenharFiltros();
+        carregarGeneros();
+        carregarLivros();
+    </script>
+</body>
+</html>
